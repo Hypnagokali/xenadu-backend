@@ -18,11 +18,19 @@ Route::group(['prefix' => 'auth', 'namespace' => 'Auth'], function () {
     Route::get('me', 'MeController@getUser');
 });
 
+Route::group(['prefix' => 'monitor', 'namespace' => 'Monitor'], function () {
+    Route::get('{username}/goals', function ($username) {
+        echo 'Goalmonitor: ' . $username;
+    });
+});
+
 Route::group(['prefix' => 'prospect/week', 'namespace' => 'Prospective'], function () {
     // Create
     Route::post('goal', 'WeeklyGoalsController@createGoal');
     // Update
     Route::post('goal/{id}', 'WeeklyGoalsController@updateGoal');
+    // set to Done
+    Route::post('goal/{id}/state/{state}', 'WeeklyGoalsController@setState');
     // Delete
     Route::post('goal/{id}/delete', 'WeeklyGoalsController@deleteGoal');
     // Read

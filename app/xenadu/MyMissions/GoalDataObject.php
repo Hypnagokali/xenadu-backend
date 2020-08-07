@@ -12,6 +12,7 @@ class GoalDataObject
     public $name;
     public $description;
     public $addedOn;
+    public $state;
     public $week;
     public $workloadPoints;
 
@@ -21,6 +22,9 @@ class GoalDataObject
         $this->name = $goal->name;
         $this->description = $goal->description;
         $this->addedOn = $goal->added_on;
+
+        $this->state = $goal->currentState->name;
+
         $this->week = $week;
         $this->workloadPoints = $points;
     }

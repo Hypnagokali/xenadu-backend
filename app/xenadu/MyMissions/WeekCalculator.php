@@ -7,6 +7,12 @@ use Exception;
 class WeekCalculator
 {
 
+    const WEEK_NAMES = [
+        0 => 'current',
+        1 => 'next',
+        2 => 'nextAfterNext',
+        3 => 'inThreeWeeks'
+    ];
     /*
         Temporary helper function to calc the cw
     */
@@ -25,22 +31,10 @@ class WeekCalculator
     {
         $numbersOfDays = $value * 7;
         return self::calcCW($numbersOfDays);
-        /*
-        switch ($value) {
-            case 0:
-                return self::calcCW(0);
-                break;
-            case 1:
-                return self::calcCW(7);
-                break;
-            case 2:
-                return self::calcCW(14);
-                break;
-            case 3:
-                return self::calcCW(21);
-                break;
-            default:
-                throw new Exception('Week Value was not 0, 1, 2 or 3');
-        }*/
+    }
+
+    public static function getWeekNameFromValue($value)
+    {
+        return self::WEEK_NAMES[$value];
     }
 }
