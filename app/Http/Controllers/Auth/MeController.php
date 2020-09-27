@@ -12,6 +12,7 @@ class MeController extends Controller
     public function __construct()
     {
         //echo "here we must have middleware action!<br>";
+        // $this->middleware('refresh');
         $this->middleware('auth:api');
     }
 

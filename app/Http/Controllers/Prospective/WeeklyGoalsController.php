@@ -24,11 +24,14 @@ class WeeklyGoalsController extends Controller
 
     public function __construct()
     {
+
         $this->middleware('auth:api');
+
         //phpcs:disable
         if (!auth()->user()) return false;
         //phpcs:enable
         $this->userId = auth()->user()->id;
+        $this->middleware('refresh');
     }
 
     private function fastPreparation($input)
@@ -79,6 +82,14 @@ class WeeklyGoalsController extends Controller
 
         $goal->delete();
         return $this->jsonResponse(['id' => $id]);
+    }
+
+
+    public function updateCW($id, Request $request)
+    {
+        $goal = $request->input('goal');
+
+        return $this->jsonResponse($goal);
     }
 
     /**
@@ -196,9 +207,7 @@ class WeeklyGoalsController extends Controller
                 $goalCollection->addGoal(new GoalDataObject($goal, $week, $points));
             }
         }
-        // $res = new WeeklyGoalsResponse($goalCollection);
         return $goalCollection;
-        // return $goalDataObjects;
     }
 
     /**
