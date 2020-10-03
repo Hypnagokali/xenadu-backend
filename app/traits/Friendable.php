@@ -10,10 +10,24 @@ trait Friendable
 
     private function findAllPendingRequests()
     {
-        $asRequester = Friendship::where('requester_id', $this->id)->get();
-        $asAddressee = Friendship::where('addressee_id', $this->id)->get();
+        $asRequester = Friendship::where(['requester_id' => $this->id, 'state' => Friendship::PENDING])->get();
+        $asAddressee = Friendship::where(['addressee_id' => $this->id, 'state' => Friendship::PENDING])->get();
 
         return ['asAddressee' => $asAddressee, 'asRequester' => $asRequester];
+    }
+
+    public function findAllPendingRequestsFromMe()
+    {
+        $asRequester = Friendship::where(['requester_id' => $this->id, 'state' => Friendship::PENDING])->get();
+
+        return $asRequester;
+    }
+
+    public function findAllPendingRequestsToMe()
+    {
+        $asAddressee = Friendship::where(['addressee_id' => $this->id, 'state' => Friendship::PENDING])->get();
+
+        return $asAddressee;
     }
 
     public function findAll()
@@ -43,6 +57,31 @@ trait Friendable
             $requestedFriendship->save();
         }
         return $requestedFriendship;
+    }
+
+    public function unfriend($userId)
+    {
+        $friendship = $this->findFriendship($userId);
+        if ($friendship !== null) {
+            $friendship->delete();
+            return true;
+        }
+        return false;
+    }
+
+    public function deny($userId)
+    {
+        $requestedFriendship = Friendship::where([
+            'addressee_id' => $this->id,
+            'requester_id' => $userId,
+            'state' => Friendship::PENDING
+        ])->first();
+
+        if ($requestedFriendship !== null) {
+            $requestedFriendship->delete();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -83,7 +122,7 @@ trait Friendable
         return $friendship;
     }
 
-    private function findFriend($userId)
+    private function findFriendship($userId)
     {
         $requester = Friendship::where(['requester_id' => $userId, 'addressee_id' => $this->id])->first();
         $addressee = Friendship::where(['addressee_id' => $userId, 'requester_id' => $this->id])->first();
@@ -93,9 +132,18 @@ trait Friendable
         return $requester ?? $addressee;
     }
 
+    public function isRequestPendingFromMe()
+    {
+        $request = Friendship::where(['addressee_id' => $this->id, 'requester_id' => auth()->user()->id, 'state' => Friendship::PENDING])->first();
+        if ($request === null) {
+            return false;
+        }
+        return true;
+    }
+
     public function isFriend($userId)
     {
-        $friendship = $this->findFriend($userId);
+        $friendship = $this->findFriendship($userId);
         if ($friendship !== null && $friendship->state === Friendship::ACCEPTED) {
             return true;
         }

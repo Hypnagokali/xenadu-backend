@@ -22,11 +22,13 @@ Route::group(['prefix' => 'auth', 'namespace' => 'Auth'], function () {
 Route::group(['prefix' => 'users', 'namespace' => 'User'], function () {
     // all users
     Route::get('/', 'UserController@findAllUsers');
+    //find a user
+    Route::get('/{userId}', 'UserController@findUserById');
 });
 
 Route::group(['prefix' => 'user', 'namespace' => 'User'], function () {
 
-    // is friend?
+        // is friend?
     Route::get('{userId}/state', 'UserController@isFriend');
 
     // add a friend
@@ -36,12 +38,18 @@ Route::group(['prefix' => 'user', 'namespace' => 'User'], function () {
     Route::post('{userId}/accept', 'UserController@acceptFriendship');
 
     // deny friendship request
+    Route::post('{userId}/deny', 'UserController@denyFriendship');
 
     // unfriend a friendship
+    Route::post('{userId}/unfriend', 'UserController@deleteFriendship');
 
     // get all friends
     Route::get('friends', 'UserController@findAllFriends');
-    // get all friendship requests (to user and from user)
+
+    // get all pending friendship requests (from user)
+    Route::get('pendingfromme', 'UserController@findPendingRequestsFromMe');
+
+    Route::get('pendingtome', 'UserController@findPendingRequestsToMe');
 
     // test route
     Route::get('{userId}/hello', 'UserController@hello');
