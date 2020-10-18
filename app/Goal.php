@@ -24,6 +24,11 @@ class Goal extends Model
         return $this->belongsTo('App\WorkloadPoints');
     }
 
+    public function goalMonitorRegistry()
+    {
+        return $this->hasOne('App\GoalMonitorRegistry');
+    }
+
     public function scheduleFor(Week $week)
     {
         $this->week_id = $week->id;
@@ -32,6 +37,11 @@ class Goal extends Model
     public function setWorkload(WorkloadPoints $workload)
     {
         $this->workload_points_id = $workload->id;
+    }
+
+    public function pushMotivations()
+    {
+        return $this->hasMany('App\GoalMonitorPushMotivation');
     }
 
     public function currentState()
@@ -56,5 +66,13 @@ class Goal extends Model
         return $this->currentState;
         // $trans = GoalStateTransition::where('goal_id', $this->id)->orderBy('changed_on', 'desc')->first();
         // return $trans;
+    }
+
+    public function isRegistered()
+    {
+        if ($this->goalMonitorRegistry === null) {
+            return false;
+        }
+        return true;
     }
 }

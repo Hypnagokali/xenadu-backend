@@ -29,7 +29,9 @@ class MeController extends Controller
         $user = $request->user();
         return response()->json([
             'email' => $user->email,
-            'name' => $user->name
+            'name' => $user->name,
+            'rewardPointsSum' => $user->rewardPoints->sum('value'),
+            'doneGoalCount' => $user->goals->where('current_state_id', 2)->count('id'),
         ]);
     }
 

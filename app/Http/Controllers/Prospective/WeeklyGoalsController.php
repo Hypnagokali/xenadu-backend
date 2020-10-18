@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers\Prospective;
 
+use App\Events\GoalCreatedEvent;
 use App\Goal;
 use App\GoalState;
 use App\GoalStateTransition;
 use App\Http\Controllers\Controller;
+use App\Listeners\RemoveGoalFromRegistryListener;
+use App\Events\GoalRemovedEvent;
+use App\GoalMonitorRegistry;
 use Xenadu\MyMissions\WeekCalculator;
 use App\Week;
 use App\WorkloadPoints;
@@ -16,6 +20,7 @@ use Xenadu\MyMissions\GoalDataObject;
 use Xenadu\MyMissions\OverdueGoalsResponse;
 use Xenadu\MyMissions\OverviewResponse;
 use Xenadu\MyMissions\WeeklyGoalsResponse;
+use App\Events\GoalDoneEvent;
 
 class WeeklyGoalsController extends Controller
 {
@@ -81,6 +86,10 @@ class WeeklyGoalsController extends Controller
         }
 
         $goal->delete();
+
+        // remove goal from goal-monitor
+        event(new GoalRemovedEvent($goal->id));
+
         return $this->jsonResponse(['id' => $id]);
     }
 
@@ -101,13 +110,25 @@ class WeeklyGoalsController extends Controller
      */
     public function updateGoal($id, Request $request)
     {
-        // cw data is in this case a real weeknumber and not a value that represents a weeknumber
-        $calendarWeekValRules = 'required|numeric|min:1|max:55';
-        $validatedData = $this->validateGoalData($request, $calendarWeekValRules);
+
+        $validatedData = null;
+        $cw = 1;
+        if ($request->input('reschedule')) {
+            // cw is a WeekValue
+            $validatedData = $this->validateGoalData($request);
+            $weekValue = $this->fastPreparation($validatedData['cw']);
+            $cw = WeekCalculator::weekValueToCW($weekValue);
+        } else {
+            // cw data is in this case a real weeknumber and not a value that represents a weeknumber
+            $calendarWeekValRules = 'required|numeric|min:1|max:55';
+            $validatedData = $this->validateGoalData($request, $calendarWeekValRules);
+
+            $cw = $this->fastPreparation($validatedData['cw']);
+        }
 
         $name = $this->fastPreparation($validatedData['name']);
         $description = $this->fastPreparation($validatedData['description']);
-        $cw = $this->fastPreparation($validatedData['cw']);
+
         $workloadLevel = $this->fastPreparation($validatedData['workload_level']);
 
         $goal = Goal::find($id);
@@ -172,7 +193,11 @@ class WeeklyGoalsController extends Controller
 
         $goal->setState($state);
 
+        // add goal to registry
+        event(new GoalCreatedEvent($this->userId, $goal->id));
+
         $goalResponse = new GoalDataObject($goal, $week, $points);
+
         return $this->jsonResponse($goalResponse, 201);
     }
 
@@ -297,15 +322,30 @@ class WeeklyGoalsController extends Controller
 
     public function setState($id, string $newState)
     {
-
         if (!$this->isCorrectState($newState)) {
             return $this->errorResponse('State not found', 404);
         };
 
-        $goal = Goal::find($id);
+        $goal = Goal::where(['user_id' => $this->userId, 'id' => $id])->first();
+
+        /*
+        * a temp variable to save the done state before changing it
+        * prevents multiple reward point assignments
+        */
+        $setMultipleTimesToDone = $goal->getState()->name === 'done';
+
+        if (empty($goal)) {
+            return $this->errorResponse('No permission for action', 401);
+        }
+
         $state = GoalState::where('name', $newState)->first();
         $goal->setState($state);
         $goal->save();
+        $goal->refresh();
+        if ($goal->getState()->name === 'done' && !$setMultipleTimesToDone) {
+            // earning reward points
+            event(new GoalDoneEvent($this->userId, $id));
+        }
 
         // Response: GoalData
         $week = $goal->week;

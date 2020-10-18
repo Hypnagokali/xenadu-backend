@@ -141,6 +141,15 @@ trait Friendable
         return true;
     }
 
+    public function hasRequestedMe()
+    {
+        $request = Friendship::where(['addressee_id' => auth()->user()->id, 'state' => Friendship::PENDING, 'requester_id' => $this->id])->first();
+        if ($request === null) {
+            return false;
+        }
+        return true;
+    }
+
     public function isFriend($userId)
     {
         $friendship = $this->findFriendship($userId);

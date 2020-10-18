@@ -7,6 +7,13 @@ use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
 
+use App\Events\GoalCreatedEvent;
+use App\Listeners\AddGoalToRegistryListener;
+use App\Events\GoalRemovedEvent;
+use App\Listeners\AddRewardPointsListener;
+use App\Listeners\RemoveGoalFromRegistryListener;
+use App\Events\GoalDoneEvent;
+
 class EventServiceProvider extends ServiceProvider
 {
     /**
@@ -15,6 +22,15 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
+        GoalDoneEvent::class => [
+            AddRewardPointsListener::class,
+        ],
+        GoalRemovedEvent::class => [
+            RemoveGoalFromRegistryListener::class,
+        ],
+        GoalCreatedEvent::class => [
+            AddGoalToRegistryListener::class,
+        ],
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],

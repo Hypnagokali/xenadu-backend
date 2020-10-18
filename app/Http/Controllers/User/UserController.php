@@ -1,9 +1,12 @@
 <?php
 namespace App\Http\Controllers\User;
 
+use App\GoalMonitorPushMotivation;
 use App\Http\Controllers\Controller;
 use Exception;
 use App\User;
+use App\Goal;
+use Xenadu\Monitor\PublicGoalDataObject;
 use Xenadu\UserObjectResponse;
 
 class UserController extends Controller
@@ -23,6 +26,14 @@ class UserController extends Controller
         $this->middleware('refresh');
     }
 
+    public function rewardPoints($userId)
+    {
+        $user = User::find($userId);
+        $points = $user->rewardPoints->sum('value');
+        $goals = $user->goals->where('current_state_id', 2)->count('id');
+        return $this->jsonResponse("Punkte: $points, Ziele erstellt: $goals");
+    }
+
     public function findUserById($userId)
     {
         $user = User::find($userId);
@@ -32,10 +43,30 @@ class UserController extends Controller
         return $this->errorResponse('User nicht gefunden', 404);
     }
 
-    // public function findAllUsers()
-    // {
-    //     return $this->jsonResponse(User::all());
-    // }
+    public function pushGoalFromUser($userId, $goalId)
+    {
+        $pushMotivation = GoalMonitorPushMotivation::create([
+            'pusher_id' => auth()->user()->id,
+            'user_id' => $userId,
+            'goal_id' => $goalId,
+        ]);
+
+        $goal = Goal::find($goalId);
+        $goalResponse = new PublicGoalDataObject($goal, $goal->week, $goal->workloadPoints);
+        return $this->jsonResponse($goalResponse);
+    }
+
+    public function findAllUsers()
+    {
+        // $users = User::all();
+        $users = User::orderBy('name', 'asc')->get();
+        $users = $users->except($this->userId);
+        $userObjectResponseList = [];
+        foreach ($users as $user) {
+            $userObjectResponseList []= new UserObjectResponse($user);
+        }
+        return $this->jsonResponse($userObjectResponseList);
+    }
 
     public function findAllFriends()
     {

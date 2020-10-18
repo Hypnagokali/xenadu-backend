@@ -22,13 +22,24 @@ Route::group(['prefix' => 'auth', 'namespace' => 'Auth'], function () {
 Route::group(['prefix' => 'users', 'namespace' => 'User'], function () {
     // all users
     Route::get('/', 'UserController@findAllUsers');
+
+    // get all friends
+    Route::get('friends', 'UserController@findAllFriends');
+
+    // get all pending friendship requests (from user)
+    Route::get('pendingfromme', 'UserController@findPendingRequestsFromMe');
+
+    Route::get('pendingtome', 'UserController@findPendingRequestsToMe');
+
+    // get all users who are not my friends and where is no outstanding request
+
     //find a user
-    Route::get('/{userId}', 'UserController@findUserById');
-});
+    Route::get('{userId}', 'UserController@findUserById');
 
-Route::group(['prefix' => 'user', 'namespace' => 'User'], function () {
+    // TEST for reward points
+    Route::get('{userId}/points', 'UserController@rewardPoints');
 
-        // is friend?
+    // is friend?
     Route::get('{userId}/state', 'UserController@isFriend');
 
     // add a friend
@@ -43,7 +54,16 @@ Route::group(['prefix' => 'user', 'namespace' => 'User'], function () {
     // unfriend a friendship
     Route::post('{userId}/unfriend', 'UserController@deleteFriendship');
 
-    // get all friends
+    // Goal Monitor
+    Route::get('{userId}/monitor/goals', 'GoalMonitorController@findGoalsFromUser');
+
+    Route::post('{userId}/push/{goalId}', 'UserController@pushGoalFromUser');
+
+});
+
+Route::group(['prefix' => 'user', 'namespace' => 'User'], function () {
+
+        // get all friends
     Route::get('friends', 'UserController@findAllFriends');
 
     // get all pending friendship requests (from user)

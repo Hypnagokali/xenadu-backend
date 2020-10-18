@@ -35,7 +35,7 @@ class GoalCollection
         $this->goals = $goals;
     }
 
-    public function addGoal(GoalDataObject $goal)
+    public function addGoal(GoalDataBasicObject $goal)
     {
         $this->goals []= $goal;
     }

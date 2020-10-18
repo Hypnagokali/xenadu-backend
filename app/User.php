@@ -69,4 +69,20 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany('App\Goal');
     }
+
+    /**
+     * Returns reward point assigned to user
+     */
+    public function rewardPoints()
+    {
+        return $this->hasMany('App\RewardPoints');
+    }
+
+    /**
+     * Returns procrastination points assigned to user
+     */
+    public function procrastinationPoints()
+    {
+        return $this->hasMany('App\ProcrastinationPoints');
+    }
 }
