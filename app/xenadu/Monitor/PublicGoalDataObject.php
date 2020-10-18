@@ -1,21 +1,15 @@
 <?php
 
-namespace Xenadu\MyMissions;
+namespace Xenadu\Monitor;
 
+
+use App\Goal;
 use App\Week;
 use App\WorkloadPoints;
-use App\Goal;
+use Xenadu\MyMissions\GoalDataBasicObject;
 
-class GoalDataObject extends GoalDataBasicObject
+class PublicGoalDataObject extends GoalDataBasicObject
 {
-    public $id;
-    public $name;
-    public $addedOn;
-    public $state;
-    public $isRegistered;
-    public $week;
-    public $workloadPoints;
-
     /**
      * @var String
      * private Informationen

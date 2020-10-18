@@ -14,6 +14,7 @@ class Controller extends BaseController
     public function jsonResponse($data, $statusCode = 200)
     {
         $headers = [
+            'MY-HEADER' => 'MAUS',
             'Content-Type' => 'application/json; charset=utf8',
             'Access-Control-Allow-Origin' => '*'
         ];

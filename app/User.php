@@ -7,9 +7,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
+use App\Traits\Friendable;
+
 class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
+
+    use Friendable;
 
     /**
      * The attributes that are mass assignable.
@@ -64,5 +68,21 @@ class User extends Authenticatable implements JWTSubject
     public function goals()
     {
         return $this->hasMany('App\Goal');
+    }
+
+    /**
+     * Returns reward point assigned to user
+     */
+    public function rewardPoints()
+    {
+        return $this->hasMany('App\RewardPoints');
+    }
+
+    /**
+     * Returns procrastination points assigned to user
+     */
+    public function procrastinationPoints()
+    {
+        return $this->hasMany('App\ProcrastinationPoints');
     }
 }

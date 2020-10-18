@@ -1,28 +1,46 @@
 <?php
+/**
+ * Creating standard user
+ * Stefan, Lisa, Gast und Max Mustermann
+ */
+
 
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
 
 use App\User;
-use Faker\Generator as Faker;
-use Illuminate\Support\Str;
 
-/*
-|--------------------------------------------------------------------------
-| Model Factories
-|--------------------------------------------------------------------------
-|
-| This directory should contain each of the model factory definitions for
-| your application. Factories provide a convenient way to generate new
-| model instances for testing / seeding your application's database.
-|
-*/
-
-$factory->define(User::class, function (Faker $faker) {
+$factory->define(User::class, function () {
+    $password = password_hash('itsmemygod', PASSWORD_BCRYPT);
     return [
-        'name' => $faker->name,
-        'email' => $faker->unique()->safeEmail,
-        'email_verified_at' => now(),
-        'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
-        'remember_token' => Str::random(10),
+        'name' => 'Stefan Simon',
+        'email' => 'stefan.simon@xenadu.de',
+        'password' => $password,
+    ];
+});
+
+$factory->define(User::class, function () {
+    $password = password_hash('secret', PASSWORD_BCRYPT);
+    return [
+        'name' => 'Max Mustermann',
+        'email' => 'max@mustermann.de',
+        'password' => $password,
+    ];
+});
+
+$factory->define(User::class, function () {
+    $password = password_hash('tertia333', PASSWORD_BCRYPT);
+    return [
+        'name' => 'Lisa S.',
+        'email' => 'lisa@stremlau.de',
+        'password' => $password,
+    ];
+});
+
+$factory->define(User::class, function () {
+    $password = password_hash('gast1', PASSWORD_BCRYPT);
+    return [
+        'name' => 'Gast',
+        'email' => 'gast@xenadu.de',
+        'password' => $password,
     ];
 });
