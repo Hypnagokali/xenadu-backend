@@ -54,8 +54,14 @@ Route::group(['prefix' => 'users', 'namespace' => 'User'], function () {
     // unfriend a friendship
     Route::post('{userId}/unfriend', 'UserController@deleteFriendship');
 
-    // Goal Monitor
+    /*
+    * Goal Monitor Controller
+    *
+    */
+
     Route::get('{userId}/monitor/goals', 'GoalMonitorController@findGoalsFromUser');
+    Route::get('{userId}/monitor/goals/{goalId}/comments', 'GoalMonitorController@commentsByUserIdAndGoalId');
+    Route::post('{userId}/monitor/goals/{goalId}/comment/send', 'GoalMonitorController@commentSave');
 
     Route::post('{userId}/push/{goalId}', 'UserController@pushGoalFromUser');
 

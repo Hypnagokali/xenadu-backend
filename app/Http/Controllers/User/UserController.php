@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Exception;
 use App\User;
 use App\Goal;
+use App\GoalMonitorComment;
 use Xenadu\Monitor\PublicGoalDataObject;
 use Xenadu\UserObjectResponse;
 
@@ -45,15 +46,26 @@ class UserController extends Controller
 
     public function pushGoalFromUser($userId, $goalId)
     {
-        $pushMotivation = GoalMonitorPushMotivation::create([
-            'pusher_id' => auth()->user()->id,
+        $pushs = GoalMonitorPushMotivation::where([
+            'pusher_id' => $this->userId,
             'user_id' => $userId,
             'goal_id' => $goalId,
-        ]);
+        ])->first();
 
-        $goal = Goal::find($goalId);
-        $goalResponse = new PublicGoalDataObject($goal, $goal->week, $goal->workloadPoints);
-        return $this->jsonResponse($goalResponse);
+        if (empty($pushs)) {
+            $pushMotivation = GoalMonitorPushMotivation::create([
+                'pusher_id' => auth()->user()->id,
+                'user_id' => $userId,
+                'goal_id' => $goalId,
+            ]);
+            $goal = Goal::find($goalId);
+            $goalResponse = new PublicGoalDataObject($goal, $goal->week, $goal->workloadPoints);
+            return $this->jsonResponse($goalResponse);
+        } else {
+            $goal = Goal::find($goalId);
+            $goalResponse = new PublicGoalDataObject($goal, $goal->week, $goal->workloadPoints);
+            return $this->jsonResponse($goalResponse);
+        }
     }
 
     public function findAllUsers()

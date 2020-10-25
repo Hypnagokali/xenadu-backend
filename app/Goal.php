@@ -13,6 +13,11 @@ class Goal extends Model
 
     protected $fillable = ['user_id', 'name', 'description', 'added_on'];
 
+    public function comments()
+    {
+        return $this->hasMany('App\GoalMonitorComment');
+    }
+
     public function week()
     {
         return $this->belongsTo('App\Week');

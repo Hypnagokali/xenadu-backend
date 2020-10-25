@@ -7,12 +7,15 @@ use DateTime;
 use Xenadu\MyMissions\WeekCalculator;
 use App\Week;
 use App\Goal;
+use App\GoalMonitorComment;
 use App\GoalMonitorRegistry;
 use Illuminate\Database\Eloquent\Collection;
 use Xenadu\MyMissions\GoalCollection;
 use Xenadu\MyMissions\GoalDataBasicObject;
 use Xenadu\MyMissions\GoalDataObject;
 use Xenadu\MyMissions\WeeklyGoalsResponse;
+use Xenadu\UserObjectResponse;
+use Symfony\Component\HttpFoundation\Request;
 
 class GoalMonitorController extends Controller
 {
@@ -28,6 +31,48 @@ class GoalMonitorController extends Controller
         //phpcs:enable
         $this->userId = auth()->user()->id;
         $this->middleware('refresh');
+    }
+
+    /**
+     * commentSave
+     */
+    public function commentSave($userId, $goalId, Request $request)
+    {
+        $data = $request->validate([
+            'comment' => 'required|min:1|max:1024'
+        ]);
+        $commentContent = htmlspecialchars($data['comment']);
+
+        // prüfe Freundschaft und Goal-User Beziehung
+        $goal = Goal::where(['id' => $goalId, 'user_id' => $userId])->first();
+
+        if (empty($goal)) {
+            return $this->errorResponse("Es wurden falsche Eingaben gemacht oder es fehlen Berechtigungen");
+        }
+
+        $comment = GoalMonitorComment::create([
+            'user_id' => $userId,
+            'commenting_user_id' => $this->userId,
+            'content' => $commentContent,
+            'goal_id' => $goalId,
+            'posted_at' => new DateTime()
+        ]);
+
+        return $this->commentsByUserIdAndGoalId($userId, $goalId);
+    }
+
+
+    /**
+     * getCommentsByUserIdAndGoalId
+     */
+    public function commentsByUserIdAndGoalId(int $userId, int $goalId)
+    {
+        $comments = GoalMonitorComment::where(['user_id' => $userId, 'goal_id' => $goalId])->get();
+        foreach ($comments as $comment) {
+            $comment->user;
+            $comment->commentingUser;
+        }
+        return $this->jsonResponse($comments);
     }
 
     /**
